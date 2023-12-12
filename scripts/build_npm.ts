@@ -51,7 +51,7 @@ const packages: Record<string, PackageInfo> = {
         "$otel/exporter-metrics-otlp-http",
         "$otel/sdk-metrics",
       ),
-      "./packages/autometrics/mod.ts": "@autometrics/autometrics",
+      "./packages/autometrics/mod.ts": "@massiveinfinity/slo-autometrics",
     },
   },
   "exporter-prometheus.ts": {
@@ -60,8 +60,8 @@ const packages: Record<string, PackageInfo> = {
       "Export metrics by pushing them to a Prometheus-compatible gateway",
     readme: "packages/autometrics/src/exporter-prometheus/README.node.md",
     mappings: {
-      ...pick(otelImports, "$otel/api", "$otel/sdk-metrics"),
-      "./packages/autometrics/mod.ts": "@autometrics/autometrics",
+      ...pick(otelImports, "$otel/api", "$otel/sdk-metrics", "$otel/core"),
+      "./packages/autometrics/mod.ts": "@massiveinfinity/slo-autometrics",
       "./packages/autometrics/src/exporter-prometheus/PrometheusExporter.ts":
         "@opentelemetry/exporter-prometheus",
     },
@@ -73,7 +73,7 @@ const packages: Record<string, PackageInfo> = {
       "packages/autometrics/src/exporter-prometheus-push-gateway/README.node.md",
     mappings: {
       ...pick(otelImports, "$otel/api", "$otel/core", "$otel/sdk-metrics"),
-      "./packages/autometrics/mod.ts": "@autometrics/autometrics",
+      "./packages/autometrics/mod.ts": "@massiveinfinity/slo-autometrics",
       "./packages/autometrics/src/exporter-prometheus-push-gateway/fetch.ts":
         "node-fetch-native",
       "./packages/autometrics/src/exporter-prometheus/PrometheusSerializer.ts":
@@ -232,14 +232,14 @@ async function generatePackageJson(outDir: string, packageInfo: PackageInfo) {
 
   const { name, description, mappings } = packageInfo;
   const packageJson: PackageJson = {
-    name: `@autometrics/${name}`,
+    name: `@massiveinfinity/slo-${name}`,
     description,
     ...packageJsonFields,
     dependencies: Object.values(mappings)
       .filter((target) => !target.startsWith("."))
       .reduce((dependencies, npmPackage) => {
         dependencies[npmPackage] =
-          npmPackage === "@autometrics/autometrics"
+          npmPackage === "@massiveinfinity/slo-autometrics"
             ? version
             : getNpmVersionRange(npmPackage);
         return dependencies;

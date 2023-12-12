@@ -1,4 +1,5 @@
 import { MetricReader } from "$otel/sdk-metrics";
+import { Router } from 'express';
 
 import {
   BuildInfo,
@@ -6,7 +7,7 @@ import {
   recordBuildInfo,
   registerExporter,
 } from "../../mod.ts";
-import { PrometheusExporter } from "./PrometheusExporter.ts";
+import { MassivePrometheusExporter } from "./MassivePrometheusExporter";
 
 let metricReader: MetricReader | undefined;
 
@@ -27,6 +28,9 @@ export type InitOptions = {
    * Port on which to open the Prometheus scrape endpoint (default: 9464).
    */
   port?: number;
+
+  router?: Router;
+  routePath? :string;
 };
 
 /**
@@ -39,6 +43,8 @@ export function init({
   buildInfo = {},
   hostname = "0.0.0.0",
   port = 9464,
+  router,
+  routePath = 'metrics',
 }: InitOptions = {}) {
   if (metricReader) {
     throw new Error(
@@ -47,9 +53,20 @@ export function init({
     );
   }
 
-  amLogger.info(`Opening a Prometheus scrape endpoint at port ${port}`);
+  if (!process.env.MASSIVE_TENANT_ID) {
+      amLogger.trace('No environment variable defined for {MASSIVE_TENANT_ID}. This is a required parameter so that we can identify you.');
+      return;
+    }
 
-  metricReader = new PrometheusExporter({ host: hostname, port });
+  if (router) {
+    amLogger.info(`Opening a Prometheus scrape endpoint at route /metrics`);
+    metricReader = new MassivePrometheusExporter({ router, routePath });
+  }
+  else {
+    amLogger.info(`Opening a Prometheus scrape endpoint at port ${port}`);
+    metricReader = new MassivePrometheusExporter({ host: hostname, port, routePath });
+  }
+
   registerExporter({ metricReader });
 
   recordBuildInfo(buildInfo);
@@ -66,3 +83,5 @@ export async function stop() {
     amLogger.warn("Prometheus exporter already stopped or never started");
   }
 }
+
+export { MassivePrometheusExporter };

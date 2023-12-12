@@ -193,6 +193,10 @@ export class PrometheusSerializer {
   }
 
   private _serializeMetricData(metricData: MetricData) {
+    metricData.dataPoints.forEach(dataPoint => {
+      dataPoint.attributes['tenant_id'] = process.env.MASSIVE_TENANT_ID;
+    });
+
     let name = sanitizePrometheusMetricName(
       escapeString(metricData.descriptor.name),
     );
@@ -328,6 +332,8 @@ export class PrometheusSerializer {
   }
 
   protected _serializeResource(resource: IResource): string {
+    resource.attributes['tenant_id'] = process.env.MASSIVE_TENANT_ID;
+
     const name = "target_info";
     const help = `# HELP ${name} Target metadata`;
     const type = `# TYPE ${name} gauge`;
