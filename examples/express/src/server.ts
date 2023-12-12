@@ -1,6 +1,7 @@
 import { autometrics } from "@autometrics/autometrics";
 import { init } from "@autometrics/exporter-prometheus";
 import express from "express";
+import basicAuth from "express-basic-auth";
 
 import { API_SLO } from "./database.js";
 import {
@@ -11,9 +12,26 @@ import {
 } from "./routes.js";
 import { delay, generateRandomTraffic } from "./util.js";
 
-init(); // opens the `/metrics` endpoint on port 9464
+// init(); // opens the `/metrics` endpoint on port 9464
 
 const app = express();
+
+const router = express.Router();
+init({ router, routePath: '' });
+
+const r2 = express.Router();
+r2.use(
+    '/metrics',
+    basicAuth({
+      users: {
+        admin: 'password'
+      },
+        challenge: true
+    }),
+    router
+);
+
+app.use(r2);
 
 app.get("/", (_, res) => {
   return res.send("Hello World!");
