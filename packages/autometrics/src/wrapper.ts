@@ -1,4 +1,5 @@
 import { ValueType } from "$otel/api";
+import { Response } from 'express';
 
 import { buildInfo } from "./buildInfo.ts";
 import {
@@ -360,10 +361,20 @@ export function autometrics<F extends FunctionSig>(
 
     function instrumentedFn(this: This<F>): ReturnType<F> {
       try {
+        let res: Response;
+        if (params.length > 2) {
+          ([,res] = params);
+        }
+
         const returnValue: ReturnType<F> = fn.apply(this, params);
         if (isPromise(returnValue)) {
           return returnValue
             .then((result: Awaited<typeof returnValue>) => {
+              if (!result && res && typeof res === 'object' && res.statusCode && res.statusCode >= 400 && res.statusCode <= 599) {
+                recordError(null);
+                return result;
+              }
+
               recordSuccess(result);
               return result;
             })
