@@ -2,7 +2,7 @@
   "private": true,
   "name": "autometrics-monorepo",
   "packageManager": "yarn@3.6.3",
-  "version": "1.0.0-mi.1",
+  "version": "1.0.0-mi.2",
   "workspaces": [
     "dist/autometrics",
     "dist/exporter-otlp-http",
@@ -11,6 +11,9 @@
     "packages/parcel-transformer-autometrics",
     "packages/typescript-plugin"
   ],
+  "scripts": {
+    "build": "just build"
+  },
   "devDependencies": {
     "@opentelemetry/api": "1.7.0",
     "@opentelemetry/core": "1.18.0",
