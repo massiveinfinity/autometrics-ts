@@ -68,7 +68,7 @@ export class PushGatewayExporter implements PushMetricExporter {
   private _export(serializedMetrics: string): Promise<void> {
     const promise = fetch(this._options.url, {
       method: "POST",
-      mode: "cors",
+      // mode: "cors",
       body: serializedMetrics,
       headers: this._options.headers,
       keepalive: true,

@@ -13,6 +13,7 @@ import {
   HISTOGRAM_DESCRIPTION,
   HISTOGRAM_NAME,
   MODULE_LABEL,
+  MONITOR_LABEL,
   RESULT_LABEL,
   SERVICE_NAME_LABEL,
 } from "./constants.ts";
@@ -54,6 +55,13 @@ type AutometricsWrapper<T extends AnyFunction<FunctionSig>> = AnyFunction<T>;
  * @group Wrapper and Decorator API
  */
 export type AutometricsOptions<F extends FunctionSig> = {
+  /**
+   * Unique ID of your SLO Monitor.
+   *
+   * @group Wrapper and Decorator API
+   */
+  monitorId?: string;
+
   /**
    * Name of your function.
    *
@@ -221,6 +229,7 @@ export function autometrics<F extends FunctionSig>(
 export function autometrics<F extends FunctionSig>(
   ...args: [F] | [AutometricsOptions<F>, F]
 ): AutometricsWrapper<F> {
+  let monitorId : string;
   let functionName: string;
   let moduleName: string | undefined;
   let fn: F;
@@ -234,10 +243,13 @@ export function autometrics<F extends FunctionSig>(
   if (typeof fnOrOptions === "function") {
     fn = fnOrOptions;
     functionName = fn.name;
+    monitorId = '';
     moduleName = getModulePath();
   } else if (maybeFn) {
     const options = fnOrOptions;
     fn = maybeFn;
+
+    monitorId = options.monitorId || '';
 
     functionName = options.functionName ?? fn.name;
     if (functionName && options.className) {
@@ -268,7 +280,7 @@ export function autometrics<F extends FunctionSig>(
     commonCounterAttributes,
     histogramAttributes,
     concurrencyAttributes,
-  } = getCommonAttributes(functionName, moduleName, objective);
+  } = getCommonAttributes(monitorId, functionName, moduleName, objective);
 
   const meter = getMeter();
   const counter = meter.createCounter(COUNTER_NAME, {
@@ -414,6 +426,7 @@ export function autometrics<F extends FunctionSig>(
  * @internal
  */
 function getCommonAttributes(
+  monitorId: string,
   functionName: string,
   moduleName?: string,
   objective?: Objective,
@@ -428,6 +441,7 @@ function getCommonAttributes(
   }
 
   const commonCounterAttributes = {
+    [MONITOR_LABEL]: monitorId,
     [FUNCTION_LABEL]: functionName,
     [MODULE_LABEL]: moduleName,
     [SERVICE_NAME_LABEL]: serviceName,
@@ -435,6 +449,7 @@ function getCommonAttributes(
   };
 
   const histogramAttributes = {
+    [MONITOR_LABEL]: monitorId,
     [FUNCTION_LABEL]: functionName,
     [MODULE_LABEL]: moduleName,
     [SERVICE_NAME_LABEL]: serviceName,
@@ -442,6 +457,7 @@ function getCommonAttributes(
   };
 
   const concurrencyAttributes = {
+    [MONITOR_LABEL]: monitorId,
     [FUNCTION_LABEL]: functionName,
     [MODULE_LABEL]: moduleName,
     [SERVICE_NAME_LABEL]: serviceName,

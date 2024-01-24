@@ -16,6 +16,7 @@ export const BRANCH_LABEL = "branch" as const;
 export const CALLER_FUNCTION_LABEL = "caller.function" as const;
 export const CALLER_MODULE_LABEL = "caller.module" as const;
 export const COMMIT_LABEL = "commit" as const;
+export const MONITOR_LABEL = "ref" as const;
 export const FUNCTION_LABEL = "function" as const;
 export const MODULE_LABEL = "module" as const;
 export const OBJECTIVE_NAME_LABEL = "objective.name" as const;

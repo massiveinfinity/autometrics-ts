@@ -19,6 +19,11 @@ export type InitOptions = {
   url: string;
 
   /**
+   * Required value that is generated from the Console Panel.
+   */
+  tenantId: string;
+
+  /**
    * Optional headers to send along to the push gateway.
    */
   headers?: Record<string, string>;
@@ -56,6 +61,7 @@ export type InitOptions = {
  */
 export function init({
   url,
+  tenantId,
   headers,
   pushInterval = 5000,
   concurrencyLimit,
@@ -69,9 +75,21 @@ export function init({
     return;
   }
 
+  if (!tenantId || !process.env.MASSIVE_TENANT_ID) {
+    amLogger.warn('No values defined for `tenantId`. This is a required parameter so that we can identify you.');
+    return;
+  }
+
   amLogger.info(`Exporter will push to the Prometheus push gateway at ${url}`);
 
-  const exporter = new PushGatewayExporter({ url, headers, concurrencyLimit });
+  const exporter = new PushGatewayExporter({
+    url,
+    headers: {
+      ...(headers || {}),
+      'x-tenant-key': tenantId
+    },
+    concurrencyLimit
+  });
 
   if (pushInterval > 0) {
     registerExporter({
