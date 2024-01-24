@@ -78,8 +78,12 @@ export class PushGatewayExporter implements PushMetricExporter {
     return promise
       .then((response) => {
         if (!response.ok) {
+          console.error(`Could not push metrics: ${response.statusText}`);
           throw new Error(`Could not push metrics: ${response.statusText}`);
         }
+      })
+      .catch(err => {
+        console.error(`Could not push metrics to ${this._options.url}`, err);
       })
       .finally(() => {
         const index = this._sendingPromises.indexOf(promise);

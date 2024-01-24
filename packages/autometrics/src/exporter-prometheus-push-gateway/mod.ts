@@ -75,7 +75,10 @@ export function init({
     return;
   }
 
-  if (!tenantId || !process.env.MASSIVE_TENANT_ID) {
+  if (!tenantId) {
+    amLogger.warn('No values defined for `tenantId`. This is a required parameter so that we can identify you.');
+    return;
+  } else if (!process.env.MASSIVE_DSO_TENANT_ID) {
     amLogger.warn('No values defined for `tenantId`. This is a required parameter so that we can identify you.');
     return;
   }
