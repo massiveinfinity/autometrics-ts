@@ -99,11 +99,13 @@ export class MassivePrometheusExporter extends MetricReader {
   }
 
   initWithDefaultServer({ host, port, routePath }: { host?: string; port?: number; routePath?: string; }) {
-    const metricsRoutePath = routePath || '/metrics';
+    const _metricsRoutePath = routePath || '/metrics';
+    const metricsRoutePath = _metricsRoutePath.charAt(0) === '/' ? _metricsRoutePath : `/${_metricsRoutePath}`;
+
     const serializer = this._serializer;
 
     this._server = createServer((req: IncomingMessage, res: ServerResponse) => {
-      if (req.url !== `/${metricsRoutePath}`) {
+      if (req.url !== `${metricsRoutePath}`) {
         res.statusCode = 404;
         res.end();
         return;
@@ -136,7 +138,7 @@ export class MassivePrometheusExporter extends MetricReader {
         },
         () => {
           amLogger.debug(
-              `Prometheus exporter server started: ${host}:${serverPort}/${metricsRoutePath}`
+              `Prometheus exporter server started: ${host}:${serverPort}${metricsRoutePath}`
           )
         }
     );
@@ -144,7 +146,8 @@ export class MassivePrometheusExporter extends MetricReader {
 
   initWithExpress({ router, routePath }: { router: Router; routePath?: string; }) {
     const serializer = this._serializer;
-    router.get(routePath === undefined || routePath === null ? "/metrics": routePath, async (_req: Request, res: Response) => {
+    const path = routePath === undefined || routePath === null ? "/metrics": routePath;
+    router.get(path.charAt(0) === '/' ? path : `/${path}`, async (_req: Request, res: Response) => {
       Object.entries(HEADERS).forEach(([headerKey, headerValue]) => {
         res.append(headerKey, headerValue);
       });

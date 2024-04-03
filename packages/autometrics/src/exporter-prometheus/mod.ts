@@ -44,7 +44,7 @@ export function init({
   hostname = "0.0.0.0",
   port = 9464,
   router,
-  routePath = 'metrics',
+  routePath = '/metrics',
 }: InitOptions = {}) {
   if (metricReader) {
     throw new Error(
