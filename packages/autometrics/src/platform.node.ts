@@ -4,7 +4,8 @@
 
 import { AsyncLocalStorage } from "node:async_hooks";
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, parse } from "node:path";
+import * as process from "node:process";
 
 import { AUTOMETRICS_DEFAULT_SERVICE_NAME } from "./constants.ts";
 import { getGitRepositoryUrl, getPackageStringField } from "./platformUtils.ts";
@@ -112,6 +113,15 @@ export function getALSInstance() {
   }>();
 }
 
+/**
+ * Returns a boolean indicating whether a given path is the file-system root or not.
+ *
+ * @internal
+ */
+export function isRootPath(pathToCheck: string): boolean {
+  return pathToCheck === parse(getCwd()).root;
+}
+
 function detectPackageName(): string | undefined {
   try {
     const gitConfig = readClosest("package.json");
@@ -133,12 +143,16 @@ function detectRepositoryUrl(): string | undefined {
   } catch {}
 }
 
-function readClosest(path: string): Uint8Array {
+export function readClosest(path: string): Uint8Array {
   let basePath = getCwd();
   while (basePath.length > 0) {
     try {
       return readFileSync(join(basePath, path));
     } catch {
+      // Break once we've tried the file-system root
+      if (isRootPath(basePath)) {
+        break;
+      }
       basePath = dirname(basePath);
     }
   }
