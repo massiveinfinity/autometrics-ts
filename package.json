@@ -12,7 +12,11 @@
     "packages/typescript-plugin"
   ],
   "scripts": {
-    "build": "just build"
+    "build": "just build",
+    "deploy": "yarn run deploy:autometrics && yarn run deploy:exporter-prometheus && yarn run deploy:push-gateway",
+    "deploy:autometrics": "cd dist/autometrics && npm publish --access public",
+    "deploy:exporter-prometheus": "cd dist/exporter-prometheus && npm publish --access public",
+    "deploy:push-gateway": "cd dist/exporter-prometheus-push-gateway && npm publish --access public"
   },
   "devDependencies": {
     "@opentelemetry/api": "1.7.0",
