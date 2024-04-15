@@ -21,6 +21,8 @@ npm install @massiveinfinity/slo-exporter-prometheus-push-gateway
 
 ## Examples
 
+You can find more real-life code examples: [https://github.com/massiveinfinity/dso-slo-examples](https://github.com/massiveinfinity/dso-slo-examples)
+
 ### Server-side example
 
 Import libraries and instrument your code using the `autometrics` wrapper.
