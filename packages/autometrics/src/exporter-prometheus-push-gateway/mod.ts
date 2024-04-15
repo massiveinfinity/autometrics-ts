@@ -63,7 +63,7 @@ export function init({
   url,
   tenantId,
   headers,
-  pushInterval = 5000,
+  pushInterval = 0,
   concurrencyLimit,
   timeout = 1000,
   buildInfo = {},
@@ -75,10 +75,7 @@ export function init({
     return;
   }
 
-  if (!tenantId) {
-    amLogger.warn('No values defined for `tenantId`. This is a required parameter so that we can identify you.');
-    return;
-  } else if (!process.env.MASSIVE_DSO_TENANT_ID) {
+  if (!tenantId && !process.env.MASSIVE_DSO_TENANT_ID) {
     amLogger.warn('No values defined for `tenantId`. This is a required parameter so that we can identify you.');
     return;
   }
