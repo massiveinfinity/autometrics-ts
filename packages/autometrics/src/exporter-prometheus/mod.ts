@@ -29,6 +29,7 @@ export type InitOptions = {
    */
   port?: number;
 
+  tenantId?: string;
   router?: Router;
   routePath? :string;
 };
@@ -43,6 +44,7 @@ export function init({
   buildInfo = {},
   hostname = "0.0.0.0",
   port = 9464,
+  tenantId,
   router,
   routePath = '/metrics',
 }: InitOptions = {}) {
@@ -53,18 +55,18 @@ export function init({
     );
   }
 
-  if (!process.env.MASSIVE_TENANT_ID) {
+  if (!tenantId && !process.env.MASSIVE_TENANT_ID) {
       amLogger.trace('No environment variable defined for {MASSIVE_TENANT_ID}. This is a required parameter so that we can identify you.');
       return;
     }
 
   if (router) {
     amLogger.info(`Opening a Prometheus scrape endpoint at route /metrics`);
-    metricReader = new MassivePrometheusExporter({ router, routePath });
+    metricReader = new MassivePrometheusExporter({ router, routePath, tenantId });
   }
   else {
     amLogger.info(`Opening a Prometheus scrape endpoint at port ${port}`);
-    metricReader = new MassivePrometheusExporter({ host: hostname, port, routePath });
+    metricReader = new MassivePrometheusExporter({ host: hostname, port, routePath, tenantId });
   }
 
   registerExporter({ metricReader });

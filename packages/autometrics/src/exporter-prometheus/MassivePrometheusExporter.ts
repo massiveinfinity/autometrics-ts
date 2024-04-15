@@ -43,6 +43,7 @@ export interface ExporterConfig {
 
   router?: Router;
   routePath?: string;
+  tenantId?: string;
 }
 
 export class MassivePrometheusExporter extends MetricReader {
@@ -58,14 +59,14 @@ export class MassivePrometheusExporter extends MetricReader {
    * Constructor
    * @param config Exporter configuration
    */
-  constructor({ host, port, router, routePath }: ExporterConfig) {
+  constructor({ host, port, router, routePath, tenantId }: ExporterConfig) {
     super({
       aggregationSelector: (_instrumentType) => Aggregation.Default(),
       aggregationTemporalitySelector: (_instrumentType) =>
         AggregationTemporality.CUMULATIVE,
     });
 
-    this._serializer = new PrometheusSerializer();
+    this._serializer = new PrometheusSerializer(undefined, false, tenantId);
     this._abortController = new AbortController();
 
     if (router) {

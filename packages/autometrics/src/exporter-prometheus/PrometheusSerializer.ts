@@ -162,12 +162,14 @@ const NO_REGISTERED_METRICS = "# no registered metrics";
 export class PrometheusSerializer {
   private _prefix: string | undefined;
   private _appendTimestamp: boolean;
+  private tenantId: string | undefined;
 
-  constructor(prefix?: string, appendTimestamp = false) {
+  constructor(prefix?: string, appendTimestamp = false, tenantId?: string) {
     if (prefix) {
       this._prefix = `${prefix}_`;
     }
     this._appendTimestamp = appendTimestamp;
+    this.tenantId = tenantId || process.env.MASSIVE_TENANT_ID;
   }
 
   serialize(resourceMetrics: ResourceMetrics): string {
@@ -194,7 +196,7 @@ export class PrometheusSerializer {
 
   private _serializeMetricData(metricData: MetricData) {
     metricData.dataPoints.forEach(dataPoint => {
-      dataPoint.attributes['tenant_id'] = process.env.MASSIVE_TENANT_ID;
+      dataPoint.attributes['tenant_id'] = this.tenantId;
     });
 
     let name = sanitizePrometheusMetricName(
@@ -332,7 +334,7 @@ export class PrometheusSerializer {
   }
 
   protected _serializeResource(resource: IResource): string {
-    resource.attributes['tenant_id'] = process.env.MASSIVE_TENANT_ID;
+    resource.attributes['tenant_id'] = this.tenantId;
 
     const name = "target_info";
     const help = `# HELP ${name} Target metadata`;
